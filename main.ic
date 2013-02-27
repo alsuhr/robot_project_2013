@@ -1,0 +1,77 @@
+/* Alane, Ted, Anna, Colleen 
+ * 2013-02-27
+ * Code for Performance Test 1
+ * Revision 1
+ *     Purpose: wait for start, drive up ramp
+ *     Completed: 
+ *               triggers when red light is detected
+ *               may run motors after trigger
+ *     Todo:
+ *               test with hardware
+ *               rewrite logic including switch case through array of sequence of tasks
+ */
+
+// tasks
+#define WAITS_FOR_START 0
+#define DRIVES_UP_STAIRS 1
+
+// ports
+#define PORT_CDS_START 2
+#define PORT_MOTOR_LEFT 0
+#define PORT_MOTOR_RIGHT 1
+
+// motor speeds
+#define FULL_POWER 100
+
+int main () 
+{
+    // sequences 
+    int performance_test_1[] = { WAITS_FOR_START, DRIVES_UP_STAIRS };
+    
+    // run 
+    run(performance_test_1);
+}
+
+void run(int sequence[])
+{
+    int index = 0;
+    while (index < _array_size(sequence))
+      {
+        int current_task = sequence[index];
+        switch (current_task)
+          {
+            case WAITS_FOR_START:
+              wait_for_start(PORT_CDS_START);
+            printf("Has triggered start");
+            break;
+            case DRIVES_UP_STAIRS:
+              drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER);
+            printf("Has driven up stairs");
+            break;  
+        }
+        
+        index ++;
+    }
+}
+
+void wait_for_start(int port_start_cds)
+{
+    float time_start = seconds();
+    
+    while ((seconds() - time_start) < 10.0)
+      {
+        if (analog(port_start_cds) < 10)
+          {
+            return;
+        }
+    }
+}
+
+void drive(int port_motor_left, int port_motor_right, int power_motor_left, int power_motor_right)
+{
+    while (!stop_button())
+      {
+        motor(port_motor_left, power_motor_left);
+        motor(port_motor_right, power_motor_right);
+    }
+}
