@@ -6,6 +6,7 @@
  *     Completed: 
  *               triggers when red light is detected
  *               may run motors after trigger
+ * 
  *     Todo:
  *               test with hardware
  *               rewrite logic including switch case through array of sequence of tasks
@@ -14,6 +15,9 @@
 // tasks
 #define WAITS_FOR_START 0
 #define DRIVES_UP_STAIRS 1
+#define PAUSES_MOTION 2
+#define TURNS_RIGHT 3
+#define DRIVES_FORWARD 4
 
 // ports
 #define PORT_CDS_START 2
@@ -22,11 +26,15 @@
 
 // motor speeds
 #define FULL_POWER 100
+#define ZERO_POWER 0
+
+// time constants
+#define TIME_WAITING_FOR_START 20.0
 
 int main () 
 {
     // sequences 
-    int performance_test_1[] = { WAITS_FOR_START, DRIVES_UP_STAIRS };
+    int performance_test_1[] = { WAITS_FOR_START, DRIVES_UP_STAIRS, PAUSES_MOTION, TURNS_RIGHT, PAUSES_MOTION, DRIVES_FORWARD, PAUSES_MOTION };
     
     // run 
     run(performance_test_1);
@@ -41,13 +49,39 @@ void run(int sequence[])
         switch (current_task)
           {
             case WAITS_FOR_START:
-              wait_for_start(PORT_CDS_START);
-            printf("Has triggered start");
+              {
+                wait_for_start(PORT_CDS_START);
+                printf("Has triggered start");
+            }
             break;
+            
             case DRIVES_UP_STAIRS:
-              drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER);
-            printf("Has driven up stairs");
-            break;  
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER, 15.0);
+                printf("Has driven up stairs");
+            }
+            break; 
+            
+            case PAUSES_MOTION: 
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, ZERO_POWER, ZERO_POWER, 1.0);
+                printf("Has paused motion");
+            }
+            break;
+            
+            case TURNS_RIGHT:
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, -FULL_POWER, FULL_POWER, 4.0);
+                printf("Has turned right");
+            }
+            break;
+            
+            case DRIVES_FORWARD:
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER, 10.0);
+                printf("Has driven forward.");
+            }
+            break;
         }
         
         index ++;
@@ -58,7 +92,7 @@ void wait_for_start(int port_start_cds)
 {
     float time_start = seconds();
     
-    while ((seconds() - time_start) < 10.0)
+    while ((seconds() - time_start) < TIME_WAITING_FOR_START)
       {
         if (analog(port_start_cds) < 10)
           {
@@ -67,11 +101,13 @@ void wait_for_start(int port_start_cds)
     }
 }
 
-void drive(int port_motor_left, int port_motor_right, int power_motor_left, int power_motor_right)
+void drive(int port_motor_left, int port_motor_right, int power_motor_left, int power_motor_right, float time_duration)
 {
-    while (!stop_button())
+    float time_start = seconds();
+    
+    while ((seconds() - time_start) < time_duration)
       {
-        motor(port_motor_left, power_motor_left);
+        motor(port_motor_left, -power_motor_left);
         motor(port_motor_right, power_motor_right);
     }
 }
