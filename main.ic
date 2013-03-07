@@ -1,15 +1,6 @@
-/* Alane, Ted, Anna, Colleen 
+/* Alane, Ted, Anna, Colleen
  * 2013-02-27
- * Code for Performance Test 1
- * Revision 1
- *     Purpose: wait for start, drive up ramp
- *     Completed: 
- *               triggers when red light is detected
- *               may run motors after trigger
- * 
- *     Todo:
- *               test with hardware
- *               rewrite logic including switch case through array of sequence of tasks
+ * Code for Performance Test 2
  */
 
 // tasks
@@ -18,11 +9,14 @@
 #define PAUSES_MOTION 2
 #define TURNS_RIGHT 3
 #define DRIVES_FORWARD 4
+#define TURNS_LEFT 5
+#define DRIVES_BACKWARD 6
+#define DRIVES_FORWARD_2 7
 
 // ports
 #define PORT_CDS_START 2
-#define PORT_MOTOR_LEFT 0
-#define PORT_MOTOR_RIGHT 1
+#define PORT_MOTOR_LEFT 2
+#define PORT_MOTOR_RIGHT 0
 
 // motor speeds
 #define FULL_POWER 100
@@ -31,13 +25,15 @@
 // time constants
 #define TIME_WAITING_FOR_START 20.0
 
-int main () 
+int main ()
 {
-    // sequences 
-    int performance_test_1[] = { WAITS_FOR_START, DRIVES_UP_STAIRS, PAUSES_MOTION, TURNS_RIGHT, PAUSES_MOTION, DRIVES_FORWARD, PAUSES_MOTION };
+    // sequences
+    int performance_test_1[] = { WAITS_FOR_START, DRIVES_FORWARD, PAUSES_MOTION, TURNS_LEFT, PAUSES_MOTION, DRIVES_UP_STAIRS, PAUSES_MOTION, TURNS_RIGHT, DRIVES_FORWARD };
+    int performance_test_2[] = { WAITS_FOR_START, DRIVES_FORWARD, PAUSES_MOTION, TURNS_LEFT, PAUSES_MOTION, DRIVES_FORWARD, 
+          DRIVES_FORWARD, PAUSES_MOTION, DRIVES_BACKWARD, PAUSES_MOTION, TURNS_RIGHT, PAUSES_MOTION, DRIVES_FORWARD_2, PAUSES_MOTION, TURNS_RIGHT, DRIVES_FORWARD };
     
-    // run 
-    run(performance_test_1);
+    // run
+    run(performance_test_2);
 }
 
 void run(int sequence[])
@@ -51,35 +47,56 @@ void run(int sequence[])
             case WAITS_FOR_START:
               {
                 wait_for_start(PORT_CDS_START);
-                printf("Has triggered start");
+                printf("Has triggered start\n");
             }
             break;
             
             case DRIVES_UP_STAIRS:
               {
-                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER, 15.0);
-                printf("Has driven up stairs");
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER, 3.0);
+                printf("Has driven up stairs\n");
             }
-            break; 
+            break;
             
-            case PAUSES_MOTION: 
+            case PAUSES_MOTION:
               {
                 drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, ZERO_POWER, ZERO_POWER, 1.0);
-                printf("Has paused motion");
+                printf("Has paused motion\n");
             }
             break;
             
             case TURNS_RIGHT:
               {
-                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, -FULL_POWER, FULL_POWER, 4.0);
-                printf("Has turned right");
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, -FULL_POWER, 0.8);
+                printf("Has turned right\n");
             }
             break;
             
             case DRIVES_FORWARD:
               {
-                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER, 10.0);
-                printf("Has driven forward.");
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_POWER, FULL_POWER, 0.6);
+                printf("Has driven forward.\n");
+            }
+            break;
+            
+            case TURNS_LEFT:
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, -FULL_POWER, FULL_POWER, 0.8);
+                printf("Has turned left\n");
+            }
+            break;
+            
+            case DRIVES_BACKWARD:
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, -FULL_POWER, -FULL_POWER, 0.6);
+                printf("Has driven backward");
+            }
+            break;   
+            
+            case DRIVES_FORWARD_2:
+              {
+                drive(PORT_MOTOR_LEFT, PORT_MOTOR_RIGHT, FULL_PO WER, FULL_POWER, 1.1);
+                printf("Has driven forward.\n");
             }
             break;
         }
